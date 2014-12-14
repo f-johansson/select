@@ -1,0 +1,37 @@
+﻿.menuActive {
+    z-index: 2;
+}
+.ui-select-container {
+    cursor:pointer;
+    line-height: 31px;
+    height: 31px;
+    border: 1px solid #cdcdcd;
+    border-radius: 3px;
+    display: inline-block;
+    vertical-align: middle;
+}
+.ui-select-container span {
+    padding: 3px;
+}
+.ui-select-container span:after {
+    content:" -------V";
+}
+.ui-select-list {
+    cursor:pointer;
+    list-style:none;
+    list-style-type: none;
+    background-color: #fff;
+    overflow: auto;
+    margin:0;
+    padding: 0;
+    padding-left: 5px;
+    border: 1px solid #e0e0e0;
+}
+.ui-select-list li {
+    cursor:pointer;
+    line-height: 31px;
+    border-bottom: 1px solid #e0e0e0;
+}
+.ui-select-list li:hover:after {
+    content:" <---"
+}
