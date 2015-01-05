@@ -6,52 +6,29 @@ var ui;
             var _this = this;
             var select = $(selectNode);
 
-            var selectedOption = select.find("option:selected").first();
-            if (selectedOption.length == 0) {
-                selectedOption = select.find("option").first();
-            }
-
-            var selectWrap = $("<div class='ui-select-container'><span>select menu</span></div>");
-
+            var selectWrap = $("<div class='ui-select-container'><span></span></div>");
             selectWrap.insertBefore(select);
 
+            var selectedOption = this.getSelectedOption(select);
             var span = selectWrap.find("span");
             span.text(selectedOption.text());
+
             select.appendTo(selectWrap);
             select.hide();
 
-            // Get items
-            var items = new Array();
-            select.find("option").each(function (index, item) {
-                items.push({
-                    text: this.innerText,
-                    value: this.value,
-                    index: index
-                });
-            });
+            this._items = this.getItems(select);
 
             // Create a template
             var wrap = $("<div class='ui-select-wrap' style='display:none;'></div");
-            var list = $("<ul class='ui-select-list'></ul>");
-
-            // Append items
-            items.forEach(function (item, index) {
-                var li = $("<li i='" + item.index + "'>" + item.text + "</li>");
-                list.append(li);
-            });
+            var list = this.createListFromItems(this._items);
             wrap.append(list);
             var body = $("body");
             body.append(wrap);
 
-            var selectItem = function (templateElement) {
-                var index = $(templateElement).attr("i");
-                var item = items[index];
-                select.val(item.value);
-                var selectedOption = select.find("option:selected").first();
-                span.text(selectedOption.text());
-            };
-
             // events
+            //select.change(e => {
+            //    e.relatedTarget
+            //});
             selectWrap.click(function (e) {
                 _this.toggleMenu(wrap, span);
                 e.stopPropagation();
@@ -59,9 +36,11 @@ var ui;
 
             // click on an item
             list.find("li").click(function (e) {
-                selectItem(this);
+                var li = e.currentTarget;
+                _this.selectItem(select, span, li);
             });
 
+            // Hide the menu if click anywhere else in the document
             $(document).click(function (e) {
                 if (wrap.is(":visible")) {
                     wrap.hide();
@@ -75,13 +54,48 @@ var ui;
             }
         };
 
+        select.prototype.createListFromItems = function (items) {
+            var list = $("<ul class='ui-select-list'></ul>");
+            items.forEach(function (item, index) {
+                var li = $("<li i='" + item.index + "'>" + item.text + "</li>");
+                list.append(li);
+            });
+            return list;
+        };
+
+        select.prototype.selectItem = function (select, span, templateElement) {
+            var index = $(templateElement).attr("i");
+            var item = this._items[index];
+            select.val(item.value);
+            var selectedOption = select.find("option:selected").first();
+            span.text(selectedOption.text());
+        };
+
+        select.prototype.getSelectedOption = function (select) {
+            var selectedOption = select.find("option:selected").first();
+            if (selectedOption.length == 0) {
+                selectedOption = select.find("option").first();
+            }
+            return selectedOption;
+        };
+
+        select.prototype.getItems = function (select) {
+            var items = new Array();
+            select.find("option").each(function (index, item) {
+                items.push({
+                    text: this.innerText,
+                    value: this.value,
+                    index: index
+                });
+            });
+            return items;
+        };
+
         select.prototype.toggleMenu = function (wrap, span) {
             if (wrap.is(":visible")) {
                 wrap.hide();
                 wrap.removeClass("menuActive");
-                wrap.css({
-                    position: ""
-                });
+                wrap.css({ position: "" });
             } else {
                 var position = span.offset();
                 var width = span.outerWidth();

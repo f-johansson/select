@@ -61,7 +61,7 @@
   <ItemGroup>
     <Content Include="packages.config" />
     <Content Include="Scripts\jquery-2.1.1.min.map" />
-    <Content Include="ViewPage1.html" />
+    <Content Include="Test.html" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

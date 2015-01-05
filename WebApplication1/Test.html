@@ -10,7 +10,16 @@
 
     <script type="text/javascript">
         $(function () {
+
             ui.select.load();
+
+            var select1 = $("#select1");
+            select1.val("3");
+            
+            select1.change(function (e) {
+                console.log("select1 changed");
+            });
+
         });
 
     </script>
@@ -20,16 +29,16 @@
     <div style="height: 502px;">
         <div class="field">awdawfwafwa</div>
         <div class="field">
-            <select name="" id="">
+            <select name="" id="select1">
                 <option value="1">ett</option>
                 <option value="2">två</option>
                 <option value="3">tre</option>
             </select>
         </div>
         <div class="field">
-            <select name="" id="">
+            <select name="" id="select2">
                 <option value="4">fyra</option>
-                <option value="5">fem</option>
+                <option selected="selected" value="5">fem</option>
                 <option value="6">sex</option>
             </select>
         </div>
