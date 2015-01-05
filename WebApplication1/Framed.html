@@ -1,0 +1,48 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <script src="Scripts/jquery-2.1.1.min.js"></script>
+    <script src="select.js"></script>
+    <link href="style.css" rel="stylesheet" />
+
+    <meta name="viewport" content="width=device-width" />
+    <title></title>
+
+    <style type="text/css">
+        body {
+            height:500px;
+            padding-left: 35px;
+        }
+
+        
+    </style>
+
+    <script type="text/javascript">
+        $(function () {
+            var select1 = $("#framedSelect");
+            select1.val("5");
+
+            ui.select.load();
+        });
+
+    </script>
+</head>
+<body>
+    <div class="field">
+        <select name="" id="framedSelect">
+            <option value="1">ett</option>
+            <option value="2">två</option>
+            <option value="3">tre</option>
+            <option value="4">fyra</option>
+            <option selected="selected" value="5">fem</option>
+            <option value="6">sex</option>
+            <option value="7">sju</option>
+            <option value="8">åtta</option>
+            <option value="9">nio</option>
+            <option value="10">tio</option>
+            <option value="11">elva</option>
+            <option value="12">tolv</option>
+        </select>
+    </div>
+</body>
+</html>

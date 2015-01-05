@@ -8,18 +8,24 @@
     <meta name="viewport" content="width=device-width" />
     <title></title>
 
+    <style type="text/css">
+        body {
+            padding-left: 35px;
+        }
+
+        .field {
+            margin: 15px 0 15px 0;
+        }
+    </style>
+
     <script type="text/javascript">
         $(function () {
-
-            ui.select.load();
-
             var select1 = $("#select1");
             select1.val("3");
-            
-            select1.change(function (e) {
-                console.log("select1 changed");
-            });
 
+            ui.select.load({
+                maxHeight: 210,
+            });
         });
 
     </script>
@@ -27,7 +33,7 @@
 </head>
 <body>
     <div style="height: 502px;">
-        <div class="field">awdawfwafwa</div>
+        <h4><i>Must handle multiple selects</i></h4>
         <div class="field">
             <select name="" id="select1">
                 <option value="1">ett</option>
@@ -42,6 +48,56 @@
                 <option value="6">sex</option>
             </select>
         </div>
+        <hr />
+        <h4><i>Must provide scrolling for large option sets</i></h4>
+        <div class="field">
+            <select id="longSelect">
+                <option value="0" selected="selected">Dag</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
+                <option value="13">13</option>
+                <option value="14">14</option>
+                <option value="15">15</option>
+                <option value="16">16</option>
+                <option value="17">17</option>
+                <option value="18">18</option>
+                <option value="19">19</option>
+                <option value="20">20</option>
+                <option value="21">21</option>
+                <option value="22">22</option>
+                <option value="23">23</option>
+                <option value="24">24</option>
+                <option value="25">25</option>
+                <option value="26">26</option>
+                <option value="27">27</option>
+                <option value="28">28</option>
+                <option value="29">29</option>
+                <option value="30">30</option>
+                <option value="31">31</option>
+            </select>
+        </div>
+        <hr />
+        <h4><i>Multiple selects must be ignored</i></h4>
+        <div class="field">
+            <select name="" id="select1" multiple="multiple">
+                <option value="1">ett</option>
+                <option value="2">två</option>
+                <option value="3">tre</option>
+            </select>
+        </div>
+        <hr />
+        <h4><i>The selectmenu must always be visible when contained in an iframe</i></h4>
+        <iframe src="Framed.html" height="120" scrolling="no"></iframe>
 
     </div>
 </body>

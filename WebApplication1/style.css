@@ -10,12 +10,18 @@
     display: inline-block;
     vertical-align: middle;
 }
+
 .ui-select-container span {
     padding: 3px;
 }
 .ui-select-container span:after {
     content:" -------V";
 }
+
+.ui-select-wrap {
+    margin: 5px 0 5px 0;
+}
+
 .ui-select-list {
     cursor:pointer;
     list-style:none;

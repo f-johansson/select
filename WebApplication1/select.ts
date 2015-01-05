@@ -2,22 +2,47 @@
 
 module ui {
 
-    interface SelectMenuItem {
+    interface ISelectMenuItem {
         text: string;
         value: string;
         index: number;
     }
 
+    export interface IOptions {
+        maxHeight: number;
+        menuActiveCssClass: string;
+    }
+
     export class select {
 
-        static load() {
-            var selectElements: NodeList = document.querySelectorAll("select");
+        static _options: IOptions;
+        static _defaultOptions: IOptions = {
+            maxHeight: 200,
+            menuActiveCssClass: "menuActive"
+        };
+
+        static load(options?: IOptions): Array<select> {
+            select.setOptions(options);
+
+            var array = new Array<select>();
+            var selectElements: NodeList = document.querySelectorAll("select:not([multiple=multiple])");
             for (var i: number = 0; i < selectElements.length; i++) {
-                new ui.select(selectElements[i]);
+                var item = new ui.select(selectElements[i]);
+                array.push(item);
+            }
+            return array;
+        }
+
+        private static setOptions(options?: IOptions) {
+            select._options = options ? options : select._defaultOptions;
+            for (var propertyName in select._defaultOptions) {
+                if (!select._options[propertyName]) {
+                    select._options[propertyName] = select._defaultOptions[propertyName];
+                }
             }
         }
 
-        private _items: Array<SelectMenuItem>;
+        private _items: Array<ISelectMenuItem>;
 
         constructor(selectNode: Node) {
 
@@ -43,16 +68,11 @@ module ui {
             body.append(wrap);
 
             // events
-            //select.change(e => {
-            //    e.relatedTarget
-            //});
-
             selectWrap.click(e => {
                 this.toggleMenu(wrap, span);
                 e.stopPropagation();
             });
 
-            // click on an item
             list.find("li").click(e => {
                 var li: Element = <Element>e.currentTarget;
                 this.selectItem(select, span, li);
@@ -66,7 +86,7 @@ module ui {
             });
         }
 
-        private createListFromItems(items: Array<SelectMenuItem>): JQuery {
+        private createListFromItems(items: Array<ISelectMenuItem>): JQuery {
             var list = $("<ul class='ui-select-list'></ul>");
             items.forEach(function (item, index) {
                 var li = $("<li i='" + item.index + "'>" + item.text + "</li>");
@@ -91,14 +111,16 @@ module ui {
             return selectedOption;
         }
 
-        private getItems(select: JQuery): Array<SelectMenuItem> {
-            var items = new Array();
-            select.find("option").each(function (index, item) {
-                items.push({
+        private getItems(select: JQuery): Array<ISelectMenuItem> {
+            var items = new Array<ISelectMenuItem>();
+            var options = select.find("option");
+            options.each(function (index, element) {
+                var item: ISelectMenuItem = {
                     text: this.innerText,
                     value: this.value,
                     index: index
-                });
+                };
+                items.push(item);
             });
             return items;
         }
@@ -106,9 +128,10 @@ module ui {
         private toggleMenu(wrap: JQuery, span: JQuery) {
             if (wrap.is(":visible")) {
                 wrap.hide();
-                wrap.removeClass("menuActive");
+                wrap.removeClass(select._options.menuActiveCssClass);
                 wrap.css({ position: "" });
             } else {
+                $(".ui-select-wrap." + select._options.menuActiveCssClass).hide();
                 var position = span.offset();
                 var width = span.outerWidth();
                 var height = span.outerHeight();
@@ -117,9 +140,17 @@ module ui {
                     position: "absolute",
                     top: (position.top + height) + "px",
                     width: width,
-                    left: (position.left) + "px"
+                    left: (position.left) + "px",
                 });
-                wrap.addClass("menuActive")
+
+                var maxHeight = Math.min(window.innerHeight, select._options.maxHeight);
+                if (wrap.height() > maxHeight) {
+                    wrap.css({ height: maxHeight });
+                    var style = wrap.attr("style");
+                    style += " overflow-y: scroll";
+                    wrap.attr("style", style);
+                }
+                wrap.addClass(select._options.menuActiveCssClass)
                 wrap.show();
             }
         }

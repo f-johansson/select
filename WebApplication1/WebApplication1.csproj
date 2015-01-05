@@ -59,6 +59,7 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Framed.html" />
     <Content Include="packages.config" />
     <Content Include="Scripts\jquery-2.1.1.min.map" />
     <Content Include="Test.html" />
