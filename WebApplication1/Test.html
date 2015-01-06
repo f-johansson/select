@@ -2,6 +2,7 @@
 <html>
 <head>
     <script src="Scripts/jquery-2.1.1.min.js"></script>
+    <script src="factory.js"></script>
     <script src="select.js"></script>
     <link href="style.css" rel="stylesheet" />
 
@@ -22,8 +23,7 @@
         $(function () {
             var select1 = $("#select1");
             select1.val("3");
-
-            ui.select.load({
+            ui.factory.load({
                 maxHeight: 210,
             });
         });

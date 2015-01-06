@@ -1,5 +1,5 @@
 ﻿/// <reference path="scripts/typings/jquery/jquery.d.ts" />
-
+/// <reference path="factory.ts" />
 module ui {
 
     interface ISelectMenuItem {
@@ -8,82 +8,41 @@ module ui {
         index: number;
     }
 
-    export interface IOptions {
-        maxHeight: number;
-        menuActiveCssClass: string;
-    }
+    class selectTemplate {
 
-    export class select {
+        container: JQuery;
+        wrap: JQuery;
+        span: JQuery;
+        list: JQuery;
+        select: JQuery;
 
-        static _options: IOptions;
-        static _defaultOptions: IOptions = {
-            maxHeight: 200,
-            menuActiveCssClass: "menuActive"
-        };
+        constructor(select: JQuery, items : Array<ISelectMenuItem>) {
 
-        static load(options?: IOptions): Array<select> {
-            select.setOptions(options);
+            this.select = select;
 
-            var array = new Array<select>();
-            var selectElements: NodeList = document.querySelectorAll("select:not([multiple=multiple])");
-            for (var i: number = 0; i < selectElements.length; i++) {
-                var item = new ui.select(selectElements[i]);
-                array.push(item);
-            }
-            return array;
-        }
+            this.container = $("<div class='ui-select-container'><a href=\"#\"><span></span></a></div>");
+            this.container.insertBefore(select);
 
-        private static setOptions(options?: IOptions) {
-            select._options = options ? options : select._defaultOptions;
-            for (var propertyName in select._defaultOptions) {
-                if (!select._options[propertyName]) {
-                    select._options[propertyName] = select._defaultOptions[propertyName];
-                }
-            }
-        }
+            var selectedOption: JQuery = this.getSelectedOption(this.select);
+            this.span = this.container.find("span");
+            this.span.text(selectedOption.text());
 
-        private _items: Array<ISelectMenuItem>;
-
-        constructor(selectNode: Node) {
-
-            var select = $(selectNode);
-
-            var selectWrap = $("<div class='ui-select-container'><span></span></div>");
-            selectWrap.insertBefore(select);
-
-            var selectedOption: JQuery = this.getSelectedOption(select);
-            var span = selectWrap.find("span");
-            span.text(selectedOption.text());
-
-            select.appendTo(selectWrap);
-            select.hide()
-
-            this._items = this.getItems(select);
+            this.select.appendTo(this.container);
+            this.select.hide();
 
             // Create a template 
-            var wrap = $("<div class='ui-select-wrap' style='display:none;'></div");
-            var list: JQuery = this.createListFromItems(this._items);
-            wrap.append(list);
-            var body = $("body");
-            body.append(wrap);
+            this.wrap = $("<div class='ui-select-wrap' style='display:none;'></div");
+            this.list = this.createListFromItems(items);
 
-            // events
-            selectWrap.click(e => {
-                this.toggleMenu(wrap, span);
-                e.stopPropagation();
-            });
+            this.wrap.append(this.list);
+        }
 
-            list.find("li").click(e => {
-                var li: Element = <Element>e.currentTarget;
-                this.selectItem(select, span, li);
-            });
-
-            // Hide the menu if click anywhere else in the document
-            $(document).click(e => {
-                if (wrap.is(":visible")) {
-                    wrap.hide();
-                }
-            });
+        private getSelectedOption(select: JQuery): JQuery {
+            var selectedOption: JQuery = select.find("option:selected").first();
+            if (selectedOption.length == 0) {
+                selectedOption = select.find("option").first();
+            }
+            return selectedOption;
         }
 
         private createListFromItems(items: Array<ISelectMenuItem>): JQuery {
@@ -94,21 +53,80 @@ module ui {
             });
             return list;
         }
+    }
 
-        private selectItem(select: JQuery, span: JQuery, templateElement: Element) {
-            var index = $(templateElement).attr("i");
-            var item = this._items[index];
-            select.val(item.value);
-            var selectedOption = select.find("option:selected").first();
-            span.text(selectedOption.text());
+    export class select {
+
+        private _items: Array<ISelectMenuItem>;
+        private _options: IOptions;
+
+        constructor(selectNode: Node, options: IOptions) {
+
+            this._options = options;
+
+            var select = $(selectNode);
+            this._items = this.getItems(select);
+            var template = new selectTemplate(select, this._items);
+
+            var body = $("body");
+            body.append(template.wrap);
+
+            // events
+            var a = template.container.find("a");
+            a.click(e => {
+                template.container.click();
+                return false; // supress actual link click
+            });
+
+            a.keydown(e => this.handleKeys(e, template));
+            a.focus(e => this.toggleFocus(template.container));
+            a.blur(e => {
+                //this.toggleFocus(template.container);
+                //this.reset(template);
+            });
+
+            template.container.click(e => {
+                this.toggleMenu(template);
+                e.stopPropagation();
+            });
+
+            template.list.find("li").click(e => {
+                var li: Element = <Element>e.currentTarget;
+                this.selectItem(template, li);
+            });
+
+            $(document).click(e =>
+                this.reset(template));
         }
 
-        private getSelectedOption(select: JQuery): JQuery {
-            var selectedOption: JQuery = select.find("option:selected").first();
-            if (selectedOption.length == 0) {
-                selectedOption = select.find("option").first();
+        private handleKeys(e: JQueryEventObject, template : selectTemplate) {
+            if (e.altKey && e.keyCode === 40) {
+                this.toggleMenu(template);
             }
-            return selectedOption;
+            else if (e.keyCode === 40) {
+
+            }
+        }
+
+        private reset(template: selectTemplate): void {
+            template.wrap.hide();
+            template.container.removeClass(this._options.containerActiveCssClass);
+        }
+
+        private toggleFocus(container: JQuery) {
+            if (container.hasClass("focus")) {
+                container.removeClass("focus");
+            } else {
+                container.addClass("focus");
+            }
+        }
+
+        private selectItem(template : selectTemplate, listItem: Element) {
+            var index = $(listItem).attr("i");
+            var item = this._items[index];
+            template.select.val(item.value);
+            var selectedOption = template.select.find("option:selected").first();
+            template.span.text(selectedOption.text());
         }
 
         private getItems(select: JQuery): Array<ISelectMenuItem> {
@@ -125,13 +143,17 @@ module ui {
             return items;
         }
 
-        private toggleMenu(wrap: JQuery, span: JQuery) {
+        private toggleMenu(template: selectTemplate) {
+            var wrap = template.wrap;
+            var container = template.container;
+            var span = template.span;
+
             if (wrap.is(":visible")) {
                 wrap.hide();
-                wrap.removeClass(select._options.menuActiveCssClass);
+                wrap.removeClass(this._options.menuActiveCssClass);
+                container.removeClass(this._options.containerActiveCssClass);
                 wrap.css({ position: "" });
             } else {
-                $(".ui-select-wrap." + select._options.menuActiveCssClass).hide();
                 var position = span.offset();
                 var width = span.outerWidth();
                 var height = span.outerHeight();
@@ -143,14 +165,15 @@ module ui {
                     left: (position.left) + "px",
                 });
 
-                var maxHeight = Math.min(window.innerHeight, select._options.maxHeight);
+                var maxHeight = Math.min(window.innerHeight, this._options.maxHeight);
                 if (wrap.height() > maxHeight) {
                     wrap.css({ height: maxHeight });
                     var style = wrap.attr("style");
                     style += " overflow-y: scroll";
                     wrap.attr("style", style);
                 }
-                wrap.addClass(select._options.menuActiveCssClass)
+                wrap.addClass(this._options.menuActiveCssClass)
+                container.addClass(this._options.containerActiveCssClass);
                 wrap.show();
             }
         }
