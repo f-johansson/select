@@ -42,49 +42,50 @@ var ui;
     })();
 
     var select = (function () {
-        function select(selectNode, options) {
+        function select(id, selectNode, options) {
             var _this = this;
+            this._id = id;
             this._options = options;
 
             var select = $(selectNode);
             this._items = this.getItems(select);
-            var template = new selectTemplate(select, this._items);
+            this._template = new selectTemplate(select, this._items);
 
             var body = $("body");
-            body.append(template.wrap);
+            body.append(this._template.wrap);
 
             // events
-            var a = template.container.find("a");
+            var a = this._template.container.find("a");
             a.click(function (e) {
-                template.container.click();
+                _this._template.container.click();
                 return false;
             });
 
             a.keydown(function (e) {
-                return _this.handleKeys(e, template);
+                return _this.handleKeys(e, _this._template);
             });
             a.focus(function (e) {
-                return _this.toggleFocus(template.container);
-            });
-            a.blur(function (e) {
-                //this.toggleFocus(template.container);
-                //this.reset(template);
+                return _this.toggleFocus(_this._template.container);
             });
 
-            template.container.click(function (e) {
-                _this.toggleMenu(template);
+            this._template.container.click(function (e) {
+                _this.toggleMenu(_this._template);
                 e.stopPropagation();
             });
 
-            template.list.find("li").click(function (e) {
+            this._template.list.find("li").click(function (e) {
                 var li = e.currentTarget;
-                _this.selectItem(template, li);
+                _this.selectItem(_this._template, li);
             });
 
             $(document).click(function (e) {
-                return _this.reset(template);
+                return _this.reset();
             });
         }
+        select.prototype.getId = function () {
+            return this._id;
+        };
+
         select.prototype.handleKeys = function (e, template) {
             if (e.altKey && e.keyCode === 40) {
                 this.toggleMenu(template);
@@ -92,9 +93,9 @@ var ui;
             }
         };
 
-        select.prototype.reset = function (template) {
-            template.wrap.hide();
-            template.container.removeClass(this._options.containerActiveCssClass);
+        select.prototype.reset = function () {
+            this._template.wrap.hide();
+            this._template.container.removeClass(this._options.containerActiveCssClass);
         };
 
         select.prototype.toggleFocus = function (container) {
@@ -160,6 +161,8 @@ var ui;
                 wrap.addClass(this._options.menuActiveCssClass);
                 container.addClass(this._options.containerActiveCssClass);
                 wrap.show();
+
+                this.activated(this._id);
             }
         };
         return select;

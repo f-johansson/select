@@ -59,45 +59,50 @@ module ui {
 
         private _items: Array<ISelectMenuItem>;
         private _options: IOptions;
+        private _id: number;
+        private _template: selectTemplate;
 
-        constructor(selectNode: Node, options: IOptions) {
+        public activated: (id: number) => void;
+        public getId () : number {
+            return this._id;
+        }
+        
+        constructor(id:number, selectNode: Node, options: IOptions) {
 
+            this._id = id;
             this._options = options;
 
             var select = $(selectNode);
             this._items = this.getItems(select);
-            var template = new selectTemplate(select, this._items);
+            this._template = new selectTemplate(select, this._items);
 
             var body = $("body");
-            body.append(template.wrap);
+            body.append(this._template.wrap);
 
             // events
-            var a = template.container.find("a");
+            var a = this._template.container.find("a");
             a.click(e => {
-                template.container.click();
+                this._template.container.click();
                 return false; // supress actual link click
             });
 
-            a.keydown(e => this.handleKeys(e, template));
-            a.focus(e => this.toggleFocus(template.container));
-            a.blur(e => {
-                //this.toggleFocus(template.container);
-                //this.reset(template);
-            });
-
-            template.container.click(e => {
-                this.toggleMenu(template);
+            a.keydown(e => this.handleKeys(e, this._template));
+            a.focus(e => this.toggleFocus(this._template.container));
+                        
+            this._template.container.click(e => {
+                this.toggleMenu(this._template);
                 e.stopPropagation();
             });
 
-            template.list.find("li").click(e => {
+            this._template.list.find("li").click(e => {
                 var li: Element = <Element>e.currentTarget;
-                this.selectItem(template, li);
+                this.selectItem(this._template, li);
             });
 
             $(document).click(e =>
-                this.reset(template));
+                this.reset());
         }
+
 
         private handleKeys(e: JQueryEventObject, template : selectTemplate) {
             if (e.altKey && e.keyCode === 40) {
@@ -108,9 +113,9 @@ module ui {
             }
         }
 
-        private reset(template: selectTemplate): void {
-            template.wrap.hide();
-            template.container.removeClass(this._options.containerActiveCssClass);
+        public reset(): void {
+            this._template.wrap.hide();
+            this._template.container.removeClass(this._options.containerActiveCssClass);
         }
 
         private toggleFocus(container: JQuery) {
@@ -175,6 +180,8 @@ module ui {
                 wrap.addClass(this._options.menuActiveCssClass)
                 container.addClass(this._options.containerActiveCssClass);
                 wrap.show();
+
+                this.activated(this._id);
             }
         }
     }

@@ -14,16 +14,29 @@
             containerActiveCssClass: "active"
         };
 
+        private static _items: Array<select>;
+
         static load(options?: IOptions): Array<select> {
             factory.setOptions(options);
 
-            var items = new Array<select>();
+            this._items = new Array<select>();
             var selectElements: NodeList = document.querySelectorAll("select:not([multiple=multiple])");
             for (var i: number = 0; i < selectElements.length; i++) {
-                var item = new ui.select(selectElements[i], factory._options);
-                items.push(item);
+                var item = new ui.select(i, selectElements[i], factory._options);
+                item.activated = (id) => {
+                    this.resetOtherSelectMenus(id);
+                };
+                this._items.push(item);
             }
-            return items;
+            return this._items;
+        }
+
+        private static resetOtherSelectMenus( id : number) {
+            this._items.forEach((item: select, index: number) => {
+                if (item.getId() !== id) {
+                    item.reset();
+                }
+            });
         }
 
         private static setOptions(options?: IOptions) {
