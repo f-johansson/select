@@ -1,26 +1,30 @@
 ﻿
 .ui-select-container {
+    height:31px;
+    background: url("dropdown.png") no-repeat right top;
     cursor: pointer;
     padding: 2px;
-    border: 1px solid #cdcdcd;
-    border-radius: 3px;
     display: inline-block;
     vertical-align: middle;
+    min-width: 50px;
 }
 
     .ui-select-container.active {
-        background-color: cornflowerblue;
+        
     }
 
     .ui-select-container:hover {
-        background-color: cornflowerblue;
+        
     }
 
     .ui-select-container span {
-        padding: 3px;
+        padding-left: 4px;
+        line-height: 31px;
     }
 
     .ui-select-container a {
+        width: 100%;
+        height: 100%;
         display: inline-block;
         position: relative;
         font-size: 15px;
@@ -32,16 +36,12 @@
     }
 
     .ui-select-container a:focus {
-        outline: solid red;
+        
     }
 
-
-    .ui-select-container span:after {
-        content: " -------V";
-    }
 
 .ui-select-wrap {
-    margin: 5px 0 5px 0;
+
 }
 
     .ui-select-wrap.active {
@@ -49,6 +49,7 @@
     }
 
 .ui-select-list {
+    min-width: 50px;
     cursor: pointer;
     list-style: none;
     list-style-type: none;
@@ -66,6 +67,11 @@
         border-bottom: 1px solid #e0e0e0;
     }
 
-        .ui-select-list li:hover:after {
-            content: " <---";
+        .ui-select-list li.selected {
+            outline: solid blue;
         }
+
+        .ui-select-list li:hover:after {
+
+        }
+            

@@ -74,7 +74,8 @@
     <None Include="Scripts\jquery-2.1.1.intellisense.js" />
     <Content Include="Scripts\jquery-2.1.1.js" />
     <Content Include="Scripts\jquery-2.1.1.min.js" />
-    <Content Include="style.css" />
+    <Content Include="theme1\dropdown.png" />
+    <Content Include="theme1\style.css" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>

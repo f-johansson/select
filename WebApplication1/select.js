@@ -62,10 +62,12 @@ var ui;
             });
 
             a.keydown(function (e) {
-                return _this.handleKeys(e, _this._template);
+                _this.handleKeys(e);
             });
+
             a.focus(function (e) {
-                return _this.toggleFocus(_this._template.container);
+                _this.activated(_this._id);
+                _this.toggleFocus(_this._template.container);
             });
 
             this._template.container.click(function (e) {
@@ -73,9 +75,13 @@ var ui;
                 e.stopPropagation();
             });
 
+            this._template.list.find("li").keydown(function (e) {
+                _this.handleKeys(e);
+            });
+
             this._template.list.find("li").click(function (e) {
                 var li = e.currentTarget;
-                _this.selectItem(_this._template, li);
+                _this.selectItem(li);
             });
 
             $(document).click(function (e) {
@@ -86,16 +92,49 @@ var ui;
             return this._id;
         };
 
-        select.prototype.handleKeys = function (e, template) {
-            if (e.altKey && e.keyCode === 40) {
-                this.toggleMenu(template);
-            } else if (e.keyCode === 40) {
+        select.prototype.handleKeys = function (e) {
+            if (e.altKey && (e.keyCode === 40 || e.keyCode == 38)) {
+                this.toggleMenu(this._template);
+            }
+
+            if (e.keyCode === 40) {
+                this.alterSelection(1);
+            } else if (e.keyCode === 38) {
+                this.alterSelection(-1);
             }
         };
 
         select.prototype.reset = function () {
             this._template.wrap.hide();
             this._template.container.removeClass(this._options.containerActiveCssClass);
+        };
+
+        select.prototype.alterSelection = function (indexAdjustment) {
+            var option = this.getSelectedOption(this._template.select);
+            var selectedValue = $(this._template.select).val();
+            var item = this._items.filter(function (value, index) {
+                return value.value == selectedValue;
+            });
+            var currentIndex = item[0].index;
+            var newIndex = currentIndex + indexAdjustment;
+
+            if (newIndex < 0) {
+                newIndex = 0;
+            }
+            var maxIndex = this._items.length - 1;
+            if (newIndex > maxIndex) {
+                newIndex = maxIndex;
+            }
+            var newItem = this._items[newIndex];
+            this.selectItem(this._template.list.find("li[i=" + newIndex + "]")[0]);
+        };
+
+        select.prototype.getSelectedOption = function (select) {
+            var selectedOption = select.find("option:selected").first();
+            if (selectedOption.length == 0) {
+                selectedOption = select.find("option").first();
+            }
+            return selectedOption;
         };
 
         select.prototype.toggleFocus = function (container) {
@@ -106,12 +145,15 @@ var ui;
             }
         };
 
-        select.prototype.selectItem = function (template, listItem) {
-            var index = $(listItem).attr("i");
-            var item = this._items[index];
-            template.select.val(item.value);
-            var selectedOption = template.select.find("option:selected").first();
-            template.span.text(selectedOption.text());
+        select.prototype.selectItem = function (listItem) {
+            var $item = $(listItem);
+            var item = this._items[$item.attr("i")];
+            this._template.select.val(item.value);
+            var selectedOption = this._template.select.find("option:selected").first();
+            this._template.span.text(selectedOption.text());
+
+            this._template.list.find("li").removeClass("selected");
+            $item.addClass("selected");
         };
 
         select.prototype.getItems = function (select) {
@@ -131,7 +173,7 @@ var ui;
         select.prototype.toggleMenu = function (template) {
             var wrap = template.wrap;
             var container = template.container;
-            var span = template.span;
+            var a = template.container.find("a");
 
             if (wrap.is(":visible")) {
                 wrap.hide();
@@ -139,9 +181,9 @@ var ui;
                 container.removeClass(this._options.containerActiveCssClass);
                 wrap.css({ position: "" });
             } else {
-                var position = span.offset();
-                var width = span.outerWidth();
-                var height = span.outerHeight();
+                var position = a.offset();
+                var width = a.outerWidth();
+                var height = a.outerHeight();
 
                 //show the menu directly under
                 wrap.css({

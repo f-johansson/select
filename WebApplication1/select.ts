@@ -10,13 +10,13 @@ module ui {
 
     class selectTemplate {
 
-        container: JQuery;
-        wrap: JQuery;
-        span: JQuery;
-        list: JQuery;
-        select: JQuery;
+        public container: JQuery;
+        public wrap: JQuery;
+        public span: JQuery;
+        public list: JQuery;
+        public select: JQuery;
 
-        constructor(select: JQuery, items : Array<ISelectMenuItem>) {
+        constructor(select: JQuery, items: Array<ISelectMenuItem>) {
 
             this.select = select;
 
@@ -63,11 +63,11 @@ module ui {
         private _template: selectTemplate;
 
         public activated: (id: number) => void;
-        public getId () : number {
+        public getId(): number {
             return this._id;
         }
-        
-        constructor(id:number, selectNode: Node, options: IOptions) {
+
+        constructor(id: number, selectNode: Node, options: IOptions) {
 
             this._id = id;
             this._options = options;
@@ -86,36 +86,70 @@ module ui {
                 return false; // supress actual link click
             });
 
-            a.keydown(e => this.handleKeys(e, this._template));
-            a.focus(e => this.toggleFocus(this._template.container));
-                        
+            a.keydown(e => { this.handleKeys(e); });
+
+            a.focus(e => {
+                this.activated(this._id);
+                this.toggleFocus(this._template.container);
+            });
+
             this._template.container.click(e => {
                 this.toggleMenu(this._template);
                 e.stopPropagation();
             });
 
+            this._template.list.find("li").keydown(e => { this.handleKeys(e); });
+
             this._template.list.find("li").click(e => {
                 var li: Element = <Element>e.currentTarget;
-                this.selectItem(this._template, li);
+                this.selectItem(li);
             });
 
-            $(document).click(e =>
-                this.reset());
+            $(document).click(e => this.reset());
         }
 
-
-        private handleKeys(e: JQueryEventObject, template : selectTemplate) {
-            if (e.altKey && e.keyCode === 40) {
-                this.toggleMenu(template);
+        private handleKeys(e: JQueryKeyEventObject) {
+            if (e.altKey && (e.keyCode === 40 || e.keyCode == 38)) {
+                this.toggleMenu(this._template);
             }
-            else if (e.keyCode === 40) {
 
+            if (e.keyCode === 40) { // down
+                this.alterSelection(1);
+            }
+            else if (e.keyCode === 38) { // up
+                this.alterSelection(-1);
             }
         }
 
         public reset(): void {
             this._template.wrap.hide();
             this._template.container.removeClass(this._options.containerActiveCssClass);
+        }
+
+        private alterSelection(indexAdjustment: number) {
+            var option = this.getSelectedOption(this._template.select);
+            var selectedValue = $(this._template.select).val();
+            var item = this._items.filter((value, index) => { return value.value == selectedValue; });
+            var currentIndex: number = item[0].index;
+            var newIndex = currentIndex + indexAdjustment;
+
+            if (newIndex < 0) {
+                newIndex = 0;
+            }
+            var maxIndex = this._items.length - 1;
+            if (newIndex > maxIndex) {
+                newIndex = maxIndex;
+            }
+            var newItem = this._items[newIndex];
+            this.selectItem(this._template.list.find("li[i=" + newIndex + "]")[0]);
+        }
+
+        private getSelectedOption(select: JQuery): JQuery {
+            var selectedOption: JQuery = select.find("option:selected").first();
+            if (selectedOption.length == 0) {
+                selectedOption = select.find("option").first();
+            }
+            return selectedOption;
         }
 
         private toggleFocus(container: JQuery) {
@@ -126,12 +160,15 @@ module ui {
             }
         }
 
-        private selectItem(template : selectTemplate, listItem: Element) {
-            var index = $(listItem).attr("i");
-            var item = this._items[index];
-            template.select.val(item.value);
-            var selectedOption = template.select.find("option:selected").first();
-            template.span.text(selectedOption.text());
+        private selectItem(listItem: Element) {
+            var $item = $(listItem);
+            var item = this._items[$item.attr("i")];
+            this._template.select.val(item.value);
+            var selectedOption = this._template.select.find("option:selected").first();
+            this._template.span.text(selectedOption.text());
+
+            this._template.list.find("li").removeClass("selected");
+            $item.addClass("selected");
         }
 
         private getItems(select: JQuery): Array<ISelectMenuItem> {
@@ -151,7 +188,7 @@ module ui {
         private toggleMenu(template: selectTemplate) {
             var wrap = template.wrap;
             var container = template.container;
-            var span = template.span;
+            var a = template.container.find("a");
 
             if (wrap.is(":visible")) {
                 wrap.hide();
@@ -159,9 +196,9 @@ module ui {
                 container.removeClass(this._options.containerActiveCssClass);
                 wrap.css({ position: "" });
             } else {
-                var position = span.offset();
-                var width = span.outerWidth();
-                var height = span.outerHeight();
+                var position = a.offset();
+                var width = a.outerWidth();
+                var height = a.outerHeight();
                 //show the menu directly under
                 wrap.css({
                     position: "absolute",
